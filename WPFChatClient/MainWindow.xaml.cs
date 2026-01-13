@@ -11,26 +11,6 @@ namespace WPFChatClient
         public MainWindow()
         {
             InitializeComponent();
-
-            // 1. Tạo kết nối đến Server (Lưu ý port 7078)
-            connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:7078/chathub")
-                .WithAutomaticReconnect()
-                .Build();
-
-            // 2. Lắng nghe sự kiện "ReceiveMessage" từ Server gửi về
-            connection.On<string, string>("ReceiveMessage", (user, message) =>
-            {
-                // Vì SignalR chạy thread ngầm, phải dùng Dispatcher để update giao diện
-                this.Dispatcher.Invoke(() =>
-                {
-                    var fullMessage = $"{user}: {message}";
-                    lstChat.Items.Add(fullMessage);
-
-                    // Tự động cuộn xuống tin nhắn mới nhất
-                    lstChat.ScrollIntoView(fullMessage);
-                });
-            });
             LoadEmojis();
         }
 
@@ -43,19 +23,62 @@ namespace WPFChatClient
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(txtServerIP.Text))
+            {
+                MessageBox.Show("Vui lòng nhập IP Server!");
+                return;
+            }
+
             try
             {
+                // Lấy IP từ TextBox
+                string serverIP = txtServerIP.Text.Trim();
+                string serverUrl = $"https://{serverIP}:7078/chathub";
+
+                // Tạo kết nối đến Server với IP động
+                connection = new HubConnectionBuilder()
+                    .WithUrl(serverUrl, options =>
+                    {
+                        // Bỏ qua lỗi SSL certificate khi test trên LAN
+                        options.HttpMessageHandlerFactory = (handler) =>
+                        {
+                            if (handler is System.Net.Http.HttpClientHandler clientHandler)
+                            {
+                                clientHandler.ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+                            }
+                            return handler;
+                        };
+                    })
+                    .WithAutomaticReconnect()
+                    .Build();
+
+                // Lắng nghe sự kiện "ReceiveMessage" từ Server gửi về
+                connection.On<string, string>("ReceiveMessage", (user, message) =>
+                {
+                    // Vì SignalR chạy thread ngầm, phải dùng Dispatcher để update giao diện
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        var fullMessage = $"{user}: {message}";
+                        lstChat.Items.Add(fullMessage);
+
+                        // Tự động cuộn xuống tin nhắn mới nhất
+                        lstChat.ScrollIntoView(fullMessage);
+                    });
+                });
+
+                // Kết nối
                 await connection.StartAsync();
-                lstChat.Items.Add("--- Đã kết nối thành công tới Server! ---");
+                lstChat.Items.Add($"--- Đã kết nối thành công tới {serverIP}! ---");
 
                 // Mở khóa nút Gửi và khóa nút Kết nối
                 btnSend.IsEnabled = true;
                 btnConnect.IsEnabled = false;
                 txtUser.IsEnabled = false;
+                txtServerIP.IsEnabled = false;
             }
             catch (System.Exception ex)
             {
-                MessageBox.Show($"Lỗi kết nối: {ex.Message}");
+                MessageBox.Show($"Lỗi kết nối: {ex.Message}\n\nHãy kiểm tra:\n- Server đã chạy chưa?\n- IP có đúng không?\n- Firewall có chặn không?");
             }
         }
 

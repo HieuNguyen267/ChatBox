@@ -28,10 +28,20 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
-            <TextBlock Text="Tên bạn:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-            <TextBox x:Name="txtUser" Width="150" Padding="5"/>
-            <Button x:Name="btnConnect" Content="Kết nối Server" Click="btnConnect_Click" Margin="10,0,0,0" Padding="10,5" Background="#DDDDDD"/>
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <!-- Dòng 1: IP Server -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Text="IP Server:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold" Width="80"/>
+                <TextBox x:Name="txtServerIP" Width="200" Padding="5" Text="localhost"/>
+                <TextBlock Text="(localhost hoặc 192.168.x.x)" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="Gray" FontSize="11"/>
+            </StackPanel>
+            
+            <!-- Dòng 2: Tên và nút kết nối -->
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Tên bạn:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold" Width="80"/>
+                <TextBox x:Name="txtUser" Width="200" Padding="5"/>
+                <Button x:Name="btnConnect" Content="Kết nối Server" Click="btnConnect_Click" Margin="10,0,0,0" Padding="10,5" Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
+            </StackPanel>
         </StackPanel>
 
         <ListBox x:Name="lstChat" Grid.Row="1" Margin="0,0,0,10" Background="#F0F0F0" BorderBrush="#CCCCCC"/>

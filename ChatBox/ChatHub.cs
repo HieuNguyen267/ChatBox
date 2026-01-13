@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace ChatSever
+namespace ChatBox
 {
     public class ChatHub : Hub
     {
