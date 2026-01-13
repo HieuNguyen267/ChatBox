@@ -12,12 +12,7 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 // Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-
 builder.Services.AddSignalR();
-builder.Services.AddOpenApi();
 
 // Thêm CORS để cho phép kết nối từ các máy khác
 builder.Services.AddCors(options =>
@@ -32,21 +27,10 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
 app.UseHttpsRedirection();
 
 // Sử dụng CORS
 app.UseCors("AllowAll");
-
-app.UseAuthorization();
-
-app.MapControllers();
 
 app.MapHub<ChatHub>("/chathub");
 
